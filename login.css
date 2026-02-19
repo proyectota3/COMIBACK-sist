@@ -1,0 +1,9 @@
+body {
+    background: url('/images/fondoback2.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+}
