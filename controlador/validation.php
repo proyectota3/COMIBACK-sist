@@ -19,7 +19,7 @@ if ($user === '' || $pass === '') {
 $db = new DatabaseComidBack();
 $conn = $db->getConnection();
 
-$stmt = $conn->prepare("SELECT * FROM usuarios WHERE Mail = :user LIMIT 1");
+$stmt = $conn->prepare("SELECT * FROM Usuarios WHERE Mail = :user LIMIT 1");
 $stmt->execute([':user' => $user]);
 $u = $stmt->fetch(PDO::FETCH_ASSOC);
 
