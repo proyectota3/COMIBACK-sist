@@ -12,6 +12,7 @@ class EmpresasModel {
     private ?string $colRUT;
     private ?string $colDireccion;
     private ?string $colActivo;
+    private ?string $colValidacion;
 
     public function __construct() {
         $this->pdo = DbComidApp::pdo();
@@ -22,10 +23,12 @@ class EmpresasModel {
         $this->colRUT = SchemaHelper::pick($cols, ["RUT","rut"]);
         $this->colDireccion = SchemaHelper::pick($cols, ["Direccion","dirección","Dir","direccion"]);
         $this->colActivo = SchemaHelper::pick($cols, ["Activo","activo","Estado","estado"]);
+        // En tu esquema real, el campo se llama Validacion
+        $this->colValidacion = SchemaHelper::pick($cols, ["Validacion","validacion","Validado","validado"]);
     }
 
     public function meta(): array {
-        return ['table'=>$this->table,'pk'=>$this->pk,'nombre'=>$this->colNombre,'mail'=>$this->colMail,'rut'=>$this->colRUT,'direccion'=>$this->colDireccion,'activo'=>$this->colActivo];
+        return ['table'=>$this->table,'pk'=>$this->pk,'nombre'=>$this->colNombre,'mail'=>$this->colMail,'rut'=>$this->colRUT,'direccion'=>$this->colDireccion,'activo'=>$this->colActivo,'validacion'=>$this->colValidacion];
     }
 
     public function list(string $q=""): array {
@@ -51,7 +54,13 @@ class EmpresasModel {
 
     public function create(array $data): int {
         $fields=[]; $params=[];
-        foreach (['nombre'=>$this->colNombre,'mail'=>$this->colMail,'rut'=>$this->colRUT,'direccion'=>$this->colDireccion,'activo'=>$this->colActivo] as $k=>$col) {
+        // Si el PK no es auto-increment (como IDEmp en ComidAPP), lo soportamos como 'id'
+        if ($this->pk && isset($data['id']) && $data['id'] !== "") {
+            $fields[] = $this->pk;
+            $params[':id'] = (int)$data['id'];
+        }
+
+        foreach (['nombre'=>$this->colNombre,'mail'=>$this->colMail,'rut'=>$this->colRUT,'direccion'=>$this->colDireccion,'activo'=>$this->colActivo,'validacion'=>$this->colValidacion] as $k=>$col) {
             if ($col && isset($data[$k]) && $data[$k] !== "") {
                 $fields[] = $col; $params[":$k"] = $data[$k];
             }
@@ -60,7 +69,8 @@ class EmpresasModel {
         $sql = "INSERT INTO {$this->table} (" . implode(",", $fields) . ") VALUES (" . implode(",", array_keys($params)) . ")";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
-        return (int)$this->pdo->lastInsertId();
+        // Si el PK fue provisto, devolvemos ese ID; si no, intentamos lastInsertId
+        return isset($data['id']) ? (int)$data['id'] : (int)$this->pdo->lastInsertId();
     }
 
     public function update(int $id, array $data): void {

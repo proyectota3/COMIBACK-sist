@@ -53,6 +53,14 @@ class UsuariosWebModel {
         return password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
     }
 
+    public function existsByMail(string $mail): ?int {
+        if (!$this->colMail) return null;
+        $stmt = $this->pdo->prepare("SELECT {$this->pk} FROM {$this->table} WHERE {$this->colMail} = :m LIMIT 1");
+        $stmt->execute([':m'=>$mail]);
+        $id = $stmt->fetchColumn();
+        return $id !== false ? (int)$id : null;
+    }
+
     public function list(string $q = "", string $rol = "", string $activo = ""): array {
         $where = [];
         $params = [];
@@ -132,6 +140,52 @@ class UsuariosWebModel {
         return (int)$this->pdo->lastInsertId();
     }
 
+    /**
+     * Crea un usuario con una contraseña específica (para enviar por mail) y fuerza el cambio al primer login.
+     */
+    public function createWithPassword(array $data, string $passPlano, bool $forzarCambio = true): int {
+        $fields = [];
+        $params = [];
+
+        if ($this->colNombre) {
+            $fields[] = $this->colNombre;
+            $params[':nombre'] = (string)($data['nombre'] ?? '');
+        }
+        if ($this->colMail) {
+            $fields[] = $this->colMail;
+            $params[':mail'] = (string)($data['mail'] ?? '');
+        }
+        if ($this->colRol) {
+            $fields[] = $this->colRol;
+            $params[':rol'] = (string)($data['rol'] ?? '');
+        }
+        if ($this->colDireccion) {
+            $fields[] = $this->colDireccion;
+            $params[':direccion'] = (string)($data['direccion'] ?? '');
+        }
+        if ($this->colActivo) {
+            $fields[] = $this->colActivo;
+            $params[':activo'] = (string)($data['activo'] ?? '1');
+        }
+
+        if (!$this->colPass) throw new Exception("No se detectó la columna pass/password en usuariosweb.");
+        $fields[] = $this->colPass;
+        $params[':pass'] = password_hash($passPlano, PASSWORD_BCRYPT);
+
+        if ($this->colDebeCambiarPass && $forzarCambio) {
+            $fields[] = $this->colDebeCambiarPass;
+            $params[':cambio'] = 1;
+        } elseif ($this->colDebeCambiarPass) {
+            $fields[] = $this->colDebeCambiarPass;
+            $params[':cambio'] = 0;
+        }
+
+        $sql = "INSERT INTO {$this->table} (" . implode(",", $fields) . ") VALUES (" . implode(",", array_keys($params)) . ")";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return (int)$this->pdo->lastInsertId();
+    }
+
     public function update(int $id, array $data): void {
         if (!$this->pk) throw new Exception("No se detectó PK en usuariosweb.");
         $sets = [];
@@ -194,25 +248,42 @@ class UsuariosWebModel {
         $stmt->execute($params);
     }
 
-    public function softDelete(int $id): void {
+    /**
+     * "Baja" de usuario.
+     * - Si existe columna Activo/Estado: marca inactivo.
+     * - Si NO existe: intenta borrar. Si hay FK (cliente/empresa), no se puede borrar -> bloquea login cambiando la contraseña.
+     *
+     * @return string  'inactivated' | 'deleted' | 'blocked'
+     */
+    public function softDelete(int $id): string {
         if (!$this->pk) throw new Exception("No se detectó PK en usuariosweb.");
 
-        // Si existe Activo, hacemos soft-delete real
+        // 1) Soft-delete real si existe Activo/Estado
         if ($this->colActivo) {
             $stmt = $this->pdo->prepare("UPDATE {$this->table} SET {$this->colActivo} = 0 WHERE {$this->pk} = :id");
             $stmt->execute([':id'=>$id]);
-            return;
+            return 'inactivated';
         }
 
-        // Si NO existe Activo, NO borramos: bloqueamos el login cambiando la contraseña
+        // 2) Si no existe Activo, intentamos borrar (solo funciona si no hay referencias por FK)
+        try {
+            $stmt = $this->pdo->prepare("DELETE FROM {$this->table} WHERE {$this->pk} = :id");
+            $stmt->execute([':id'=>$id]);
+            if ($stmt->rowCount() > 0) {
+                return 'deleted';
+            }
+        } catch (PDOException $e) {
+            // Integrity constraint (FK) -> no se puede borrar, seguimos al bloqueo
+        }
+
+        // 3) Si NO se pudo borrar, bloqueamos el login cambiando la contraseña (sin tocar Mail/Nombre)
         if ($this->colPass) {
             $this->disableLogin($id);
-            return;
+            return 'blocked';
         }
 
-        // Último recurso (solo si no hay pass): borrar
-        $stmt = $this->pdo->prepare("DELETE FROM {$this->table} WHERE {$this->pk} = :id");
-        $stmt->execute([':id'=>$id]);
+        // Último recurso: si no hay pass ni Activo y no se pudo borrar
+        throw new Exception("No se pudo dar de baja el usuario (sin columna Activo y sin columna pass).\n");
     }
 }
 ?>

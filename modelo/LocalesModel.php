@@ -12,6 +12,9 @@ class LocalesModel {
     private ?string $colDireccion;
     private ?string $colActivo;
 
+    private ?string $colFoto;
+    private ?string $colDelivery;
+
     public function __construct() {
         $this->pdo = DbComidApp::pdo();
         $this->pk = SchemaHelper::primaryKey($this->pdo, $this->table);
@@ -21,10 +24,13 @@ class LocalesModel {
         $this->colNombre = SchemaHelper::pick($cols, ["Nombre","NombreLocal","nom","local"]);
         $this->colDireccion = SchemaHelper::pick($cols, ["Direccion","dirección","Dir","direccion"]);
         $this->colActivo = SchemaHelper::pick($cols, ["Activo","activo","Estado","estado"]);
+
+        $this->colFoto = SchemaHelper::pick($cols, ["Foto","foto","Imagen","img","url"]);
+        $this->colDelivery = SchemaHelper::pick($cols, ["Delivery","delivery","Envia","envia"]);
     }
 
     public function meta(): array {
-        return ['table'=>$this->table,'pk'=>$this->pk,'empresa'=>$this->colEmpresa,'nombre'=>$this->colNombre,'direccion'=>$this->colDireccion,'activo'=>$this->colActivo];
+        return ['table'=>$this->table,'pk'=>$this->pk,'empresa'=>$this->colEmpresa,'nombre'=>$this->colNombre,'direccion'=>$this->colDireccion,'activo'=>$this->colActivo,'foto'=>$this->colFoto,'delivery'=>$this->colDelivery];
     }
 
     public function listByEmpresa(int $empresaId): array {
@@ -45,7 +51,7 @@ class LocalesModel {
 
     public function create(array $data): int {
         $fields=[]; $params=[];
-        foreach (['empresa'=>$this->colEmpresa,'nombre'=>$this->colNombre,'direccion'=>$this->colDireccion,'activo'=>$this->colActivo] as $k=>$col) {
+        foreach (['empresa'=>$this->colEmpresa,'nombre'=>$this->colNombre,'direccion'=>$this->colDireccion,'activo'=>$this->colActivo,'foto'=>$this->colFoto,'delivery'=>$this->colDelivery] as $k=>$col) {
             if ($col && isset($data[$k]) && $data[$k] !== "") {
                 $fields[] = $col; $params[":$k"] = $data[$k];
             }

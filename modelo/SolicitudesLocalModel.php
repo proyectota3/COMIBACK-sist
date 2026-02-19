@@ -4,7 +4,8 @@ require_once __DIR__ . "/SchemaHelper.php";
 
 class SolicitudesLocalModel {
     private PDO $pdo;
-    private string $table = "solicitudLocal";
+    // En tu dump real la tabla se llama `solicitudlocal` (todo en minúscula)
+    private string $table = "solicitudlocal";
     private ?string $pk;
 
     public function __construct() {
@@ -14,7 +15,10 @@ class SolicitudesLocalModel {
 
     public function exists(): bool { return SchemaHelper::tableExists($this->pdo, $this->table); }
 
-    public function list(string $estado="PENDIENTE"): array {
+    /**
+     * Estados usados en tu esquema: Pendiente | Validada | Rechazada
+     */
+    public function list(string $estado="Pendiente"): array {
         $sql = "SELECT * FROM {$this->table}";
         $params = [];
         if ($estado !== "") { $sql .= " WHERE Estado = :e"; $params[':e']=$estado; }
@@ -32,16 +36,16 @@ class SolicitudesLocalModel {
         return $r ?: null;
     }
 
-    public function markApproved(int $id, string $resueltoPor): void {
-        if (!$this->pk) throw new Exception("No se detectó PK en solicitudLocal.");
-        $stmt = $this->pdo->prepare("UPDATE {$this->table} SET Estado='APROBADA', MotivoRechazo=NULL, FechaResolucion=NOW(), ResueltoPor=:rp WHERE {$this->pk}=:id");
-        $stmt->execute([':rp'=>$resueltoPor, ':id'=>$id]);
+    public function markApproved(int $id, int $idLocCreado): void {
+        if (!$this->pk) throw new Exception("No se detectó PK en solicitudlocal.");
+        $stmt = $this->pdo->prepare("UPDATE {$this->table} SET Estado='Validada', ComentarioAdmin=NULL, IDLocCreado=:loc WHERE {$this->pk}=:id");
+        $stmt->execute([':loc'=>$idLocCreado, ':id'=>$id]);
     }
 
-    public function markRejected(int $id, string $motivo, string $resueltoPor): void {
-        if (!$this->pk) throw new Exception("No se detectó PK en solicitudLocal.");
-        $stmt = $this->pdo->prepare("UPDATE {$this->table} SET Estado='RECHAZADA', MotivoRechazo=:m, FechaResolucion=NOW(), ResueltoPor=:rp WHERE {$this->pk}=:id");
-        $stmt->execute([':m'=>$motivo, ':rp'=>$resueltoPor, ':id'=>$id]);
+    public function markRejected(int $id, string $motivo): void {
+        if (!$this->pk) throw new Exception("No se detectó PK en solicitudlocal.");
+        $stmt = $this->pdo->prepare("UPDATE {$this->table} SET Estado='Rechazada', ComentarioAdmin=:m WHERE {$this->pk}=:id");
+        $stmt->execute([':m'=>$motivo, ':id'=>$id]);
     }
 }
 ?>

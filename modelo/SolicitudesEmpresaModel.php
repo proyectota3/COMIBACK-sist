@@ -14,7 +14,10 @@ class SolicitudesEmpresaModel {
 
     public function exists(): bool { return SchemaHelper::tableExists($this->pdo, $this->table); }
 
-    public function list(string $estado="PENDIENTE"): array {
+    /**
+     * En ComidAPP (base real) los estados suelen ser: Pendiente | Validada | Rechazada
+     */
+    public function list(string $estado="Pendiente"): array {
         $sql = "SELECT * FROM {$this->table}";
         $params = [];
         if ($estado !== "") { $sql .= " WHERE Estado = :e"; $params[':e']=$estado; }
@@ -32,16 +35,18 @@ class SolicitudesEmpresaModel {
         return $r ?: null;
     }
 
-    public function markApproved(int $id, string $resueltoPor): void {
+    public function markApproved(int $id): void {
         if (!$this->pk) throw new Exception("No se detectó PK en solicitud.");
-        $stmt = $this->pdo->prepare("UPDATE {$this->table} SET Estado='APROBADA', MotivoRechazo=NULL, FechaResolucion=NOW(), ResueltoPor=:rp WHERE {$this->pk}=:id");
-        $stmt->execute([':rp'=>$resueltoPor, ':id'=>$id]);
+        // En tu esquema de ComidAPP: solicitud(Estado)
+        $stmt = $this->pdo->prepare("UPDATE {$this->table} SET Estado='Validada' WHERE {$this->pk}=:id");
+        $stmt->execute([':id'=>$id]);
     }
 
-    public function markRejected(int $id, string $motivo, string $resueltoPor): void {
+    public function markRejected(int $id): void {
         if (!$this->pk) throw new Exception("No se detectó PK en solicitud.");
-        $stmt = $this->pdo->prepare("UPDATE {$this->table} SET Estado='RECHAZADA', MotivoRechazo=:m, FechaResolucion=NOW(), ResueltoPor=:rp WHERE {$this->pk}=:id");
-        $stmt->execute([':m'=>$motivo, ':rp'=>$resueltoPor, ':id'=>$id]);
+        // La tabla no tiene columna para motivo en tu dump actual
+        $stmt = $this->pdo->prepare("UPDATE {$this->table} SET Estado='Rechazada' WHERE {$this->pk}=:id");
+        $stmt->execute([':id'=>$id]);
     }
 }
 ?>

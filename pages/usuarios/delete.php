@@ -6,8 +6,19 @@ $model = new UsuariosWebModel();
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 try {
-    if ($id > 0) $model->softDelete($id);
-    header("Location: index.php");
+    $msg = "";
+    if ($id > 0) {
+        $status = $model->softDelete($id);
+        if ($status === 'deleted') {
+            $msg = "Usuario eliminado.";
+        } elseif ($status === 'inactivated') {
+            $msg = "Usuario marcado como inactivo.";
+        } else {
+            // blocked
+            $msg = "No se pudo eliminar por relaciones (FK). Se bloqueó el login cambiando la contraseña.";
+        }
+    }
+    header("Location: index.php" . ($msg ? ("?msg=" . urlencode($msg)) : ""));
     exit();
 } catch (Exception $e) {
     http_response_code(500);

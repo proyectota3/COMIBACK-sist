@@ -15,6 +15,12 @@ $title = "Usuarios | ComiBack";
 require_once __DIR__ . "/../../includes/header.php";
 ?>
 
+<?php if (!empty($_GET['msg'])): ?>
+  <div class="alert alert-info">
+    <?php echo htmlspecialchars((string)$_GET['msg']); ?>
+  </div>
+<?php endif; ?>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="h4 m-0">Usuarios (usuariosweb)</h1>
   <a class="btn btn-danger" href="form.php">Nuevo</a>

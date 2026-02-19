@@ -59,8 +59,7 @@ require_once __DIR__ . "/includes/header.php";
 </div>
 
 <div class="alert alert-warning mt-4">
-  <strong>Nota:</strong> Si ves <em>N/A</em> en “Solicitudes”, significa que todavía no existen las tablas <code>solicitud_empresa</code> / <code>solicitud_local</code>.
-  En el ZIP te dejo un script SQL para crearlas.
+  <P>Rodrigo - Gaston - Martin - Agustin - Santiago</p>
 </div>
 
 <?php require_once __DIR__ . "/includes/footer.php"; ?>

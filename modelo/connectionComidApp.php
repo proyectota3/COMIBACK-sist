@@ -9,7 +9,8 @@ class DatabaseComidApp
 
     public function __construct()
     {
-        $dsnB = "mysql:host=$this->host;Database=$this->dbName";
+        // PDO DSN correcto: usar dbname + charset
+        $dsnB = "mysql:host={$this->host};dbname={$this->dbName};charset=utf8mb4";
         try {
             $this->connB = new PDO($dsnB, $this->username, $this->password);
             $this->connB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -20,7 +21,8 @@ class DatabaseComidApp
 
     public function getConnection()
 {
-    $this->connB->exec("USE $this->dbName");
+    // Por compatibilidad, volvemos a forzar USE (no hace daño)
+    $this->connB->exec("USE `{$this->dbName}`");
     return $this->connB;
 }
 
