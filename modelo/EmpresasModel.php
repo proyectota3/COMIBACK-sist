@@ -89,13 +89,61 @@ class EmpresasModel {
     }
 
     public function softDelete(int $id): void {
+        $this->setActivo($id, 0);
+    }
+
+    public function restore(int $id): void {
+        $this->setActivo($id, 1);
+    }
+
+    /**
+     * Desactivar/activar empresa de forma segura (sin borrar filas con FK).
+     * - empresa.Activo
+     * - usuariosweb.Activo
+     * - local.Activo (todos los locales de esa empresa)
+     */
+    public function setActivo(int $id, int $activo): void {
         if (!$this->pk) throw new Exception("No se detectó PK en empresa.");
-        if ($this->colActivo) {
-            $stmt = $this->pdo->prepare("UPDATE {$this->table} SET {$this->colActivo} = 0 WHERE {$this->pk} = :id");
-            $stmt->execute([':id'=>$id]);
-        } else {
-            $stmt = $this->pdo->prepare("DELETE FROM {$this->table} WHERE {$this->pk} = :id");
-            $stmt->execute([':id'=>$id]);
+
+        // Si no existe el campo Activo en empresa, NO borramos (rompe FKs).
+        if (!$this->colActivo) {
+            throw new Exception(
+                "La tabla 'empresa' no tiene el campo 'Activo'. Ejecutá la migración (ALTER TABLE empresa ADD Activo...)."
+            );
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            // 1) empresa.Activo
+            $stmt = $this->pdo->prepare("UPDATE {$this->table} SET {$this->colActivo} = :a WHERE {$this->pk} = :id");
+            $stmt->execute([':a'=>$activo, ':id'=>$id]);
+
+            // 2) usuariosweb.Activo (si existe tabla/columna)
+            if (SchemaHelper::tableExists($this->pdo, 'usuariosweb')) {
+                $colsU = SchemaHelper::columns($this->pdo, 'usuariosweb');
+                $colUA = SchemaHelper::pick($colsU, ['Activo','activo']);
+                $colUPK = SchemaHelper::primaryKey($this->pdo, 'usuariosweb');
+                if ($colUA && $colUPK) {
+                    $stU = $this->pdo->prepare("UPDATE usuariosweb SET {$colUA} = :a WHERE {$colUPK} = :id");
+                    $stU->execute([':a'=>$activo, ':id'=>$id]);
+                }
+            }
+
+            // 3) local.Activo (todos los locales de la empresa)
+            if (SchemaHelper::tableExists($this->pdo, 'local')) {
+                $colsL = SchemaHelper::columns($this->pdo, 'local');
+                $colLE = SchemaHelper::pick($colsL, ['IDEmp','idemp','IDEmpresa','idempresa']);
+                $colLA = SchemaHelper::pick($colsL, ['Activo','activo']);
+                if ($colLE && $colLA) {
+                    $stL = $this->pdo->prepare("UPDATE local SET {$colLA} = :a WHERE {$colLE} = :id");
+                    $stL->execute([':a'=>$activo, ':id'=>$id]);
+                }
+            }
+
+            $this->pdo->commit();
+        } catch (Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
         }
     }
 }

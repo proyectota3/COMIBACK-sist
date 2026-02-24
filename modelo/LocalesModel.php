@@ -80,13 +80,13 @@ class LocalesModel {
 
     public function softDelete(int $id): void {
         if (!$this->pk) throw new Exception("No se detectó PK en local.");
-        if ($this->colActivo) {
-            $stmt = $this->pdo->prepare("UPDATE {$this->table} SET {$this->colActivo} = 0 WHERE {$this->pk} = :id");
-            $stmt->execute([':id'=>$id]);
-        } else {
-            $stmt = $this->pdo->prepare("DELETE FROM {$this->table} WHERE {$this->pk} = :id");
-            $stmt->execute([':id'=>$id]);
+        if (!$this->colActivo) {
+            throw new Exception(
+                "La tabla 'local' no tiene el campo 'Activo'. Ejecutá la migración (ALTER TABLE local ADD Activo...)."
+            );
         }
+        $stmt = $this->pdo->prepare("UPDATE {$this->table} SET {$this->colActivo} = 0 WHERE {$this->pk} = :id");
+        $stmt->execute([':id'=>$id]);
     }
 }
 ?>
