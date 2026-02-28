@@ -35,26 +35,43 @@ require_once __DIR__ . "/../../includes/header.php";
           <th>Nombre</th>
           <th>Mail</th>
           <th>RUT</th>
+          <?php if (!empty($meta['activo'])): ?>
+            <th>Activo</th>
+          <?php endif; ?>
           <th class="text-end">Acciones</th>
         </tr>
       </thead>
       <tbody>
         <?php foreach ($rows as $r): ?>
           <?php $id = $meta['pk'] ? (int)($r[$meta['pk']] ?? 0) : 0; ?>
+          <?php $isActivo = !empty($meta['activo']) ? ((int)($r[$meta['activo']] ?? 1) === 1) : true; ?>
           <tr>
             <td><?php echo htmlspecialchars($meta['pk'] ? ($r[$meta['pk']] ?? '') : ''); ?></td>
             <td><?php echo htmlspecialchars($meta['nombre'] ? ($r[$meta['nombre']] ?? '') : ''); ?></td>
             <td><?php echo htmlspecialchars($meta['mail'] ? ($r[$meta['mail']] ?? '') : ''); ?></td>
             <td><?php echo htmlspecialchars($meta['rut'] ? ($r[$meta['rut']] ?? '') : ''); ?></td>
+            <?php if (!empty($meta['activo'])): ?>
+              <td>
+                <?php if ($isActivo): ?>
+                  <span class="badge text-bg-success">Sí</span>
+                <?php else: ?>
+                  <span class="badge text-bg-secondary">No</span>
+                <?php endif; ?>
+              </td>
+            <?php endif; ?>
             <td class="text-end">
               <a class="btn btn-sm btn-outline-primary" href="view.php?id=<?php echo $id; ?>">Abrir</a>
               <a class="btn btn-sm btn-outline-secondary" href="form.php?id=<?php echo $id; ?>">Editar</a>
-              <a class="btn btn-sm btn-outline-danger" href="delete.php?id=<?php echo $id; ?>" onclick="return confirm('¿Eliminar / desactivar empresa?');">Baja</a>
+              <?php if ($isActivo): ?>
+                <a class="btn btn-sm btn-outline-danger" href="delete.php?id=<?php echo $id; ?>" onclick="return confirm('¿Desactivar empresa?');">Baja</a>
+              <?php else: ?>
+                <a class="btn btn-sm btn-outline-success" href="restore.php?id=<?php echo $id; ?>" onclick="return confirm('¿Reactivar empresa?');">Reactivar</a>
+              <?php endif; ?>
             </td>
           </tr>
         <?php endforeach; ?>
         <?php if (!$rows): ?>
-          <tr><td colspan="5" class="text-center text-muted py-4">Sin registros</td></tr>
+          <tr><td colspan="<?php echo !empty($meta['activo']) ? '6' : '5'; ?>" class="text-center text-muted py-4">Sin registros</td></tr>
         <?php endif; ?>
       </tbody>
     </table>
