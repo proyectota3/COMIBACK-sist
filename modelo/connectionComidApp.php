@@ -1,10 +1,10 @@
 <?php
 class DatabaseComidApp
 {
-    private $host = "localhost";
+    private $host = "10.0.30.10";
     private $dbName = "comidapp";
-    private $username = "root";
-    private $password = "";
+    private $username = "comidapp";
+    private $password = "comidapp12";
     private $connB;
 
     public function __construct()
