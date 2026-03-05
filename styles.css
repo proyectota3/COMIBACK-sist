@@ -1,197 +1,195 @@
-/* Estilos generales para el cuerpo y la estructura principal */
-html, body {
-  height: 100%; /* Asegura que el cuerpo ocupe toda la altura */
+/* =========================
+   Tema azul claro (simple y legible)
+   ========================= */
+:root{
+  --bg: #f2f8ff;          /* fondo general */
+  --surface: #ffffff;     /* tarjetas */
+  --text: #0f172a;        /* texto principal */
+  --muted: #475569;       /* texto secundario */
+
+  --primary: #60a5fa;     /* azul claro */
+  --primary-2: #3b82f6;   /* azul hover */
+  --primary-3: #93c5fd;   /* azul muy claro */
+  --border: #dbeafe;      /* borde celeste suave */
+
+  --danger: #ef4444;      /* rojo */
+}
+
+/* =========================
+   Layout (sticky footer)
+   ========================= */
+html, body{
+  height: 100%;
   margin: 0;
   padding: 0;
+}
+
+body{
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* Contenedor principal para el contenido de la página */
-main {
-  flex: 1; /* Toma el espacio restante entre el header y el footer */
+main{
+  flex: 1 0 auto;
 }
 
-/* Estilos para el footer */
-footer {
-  background-color: #343a40; /* Color de fondo oscuro */
-  color: #f8f9fa; /* Color de texto claro */
-  padding: 1rem 0; /* Espaciado interno */
-  font-size: 0.9rem; /* Tamaño del texto */
-  text-align: center;
+/* =========================
+   Navbar (azul claro)
+   ========================= */
+.navbar{
+  background: var(--primary) !important;
+  box-shadow: 0 10px 22px rgba(15,23,42,0.10);
 }
 
-/* Color del navbar */
-.navbar {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.navbar .navbar-brand{
+  color: #fff !important;
+  font-weight: 800;
+  padding: .35rem .6rem;
+  border-radius: 10px;
 }
 
-.navbar-brand {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #007bbd; /* Tono celeste más intenso */
+.navbar .nav-link{
+  color: rgba(255,255,255,0.95) !important;
+  border-radius: 10px;
+  padding: 0.55rem 0.8rem;
 }
 
-.navbar-nav .nav-link {
-  color: #007bbd; /* Color celeste más oscuro para los enlaces */
-  padding: 0.7rem 1rem;
-  transition: color 0.3s ease, background-color 0.3s ease;
+.navbar .navbar-brand:hover,
+.navbar .navbar-brand:focus,
+.navbar .nav-link:hover,
+.navbar .nav-link:focus{
+  color: #fff !important;
+  background: rgba(255,255,255,0.16);
 }
 
-.navbar-nav .nav-link:hover {
-  color: #ffc107;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+/* Link activo (si lo marcás con class="active") */
+.navbar .nav-link.active{
+  color: #fff !important;
+  background: rgba(255,255,255,0.22);
 }
-/* Estilo del footer para igualar al navbar */
-.footer {
-  background-color: #0368ce; /* Color de fondo similar al navbar */
-  color: #f8f9fa; /* Texto blanco */
+
+/* Toggler */
+.navbar-toggler{
+  border-color: rgba(255,255,255,0.55);
+}
+.navbar-toggler-icon{
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255,255,255,0.95%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* =========================
+   Dropdown (prolijo)
+   ========================= */
+.dropdown-menu{
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 16px 30px rgba(15,23,42,0.10);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus{
+  background: #eaf3ff;     /* celeste muy suave */
+  color: var(--text);
+}
+
+/* =========================
+   Cards / contenedores
+   ========================= */
+.card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.shadow-sm{
+  box-shadow: 0 12px 26px rgba(15,23,42,0.06) !important;
+}
+
+.text-muted{
+  color: var(--muted) !important;
+}
+
+/* =========================
+   Botones
+   ========================= */
+.btn-primary{
+  background: var(--primary-2) !important;
+  border-color: var(--primary-2) !important;
+  border-radius: 10px;
+}
+.btn-primary:hover{
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.btn-outline-danger{
+  border-color: var(--danger) !important;
+  color: var(--danger) !important;
+  border-radius: 10px;
+}
+.btn-outline-danger:hover{
+  background: var(--danger) !important;
+  color: #fff !important;
+}
+
+/* =========================
+   Alertas
+   ========================= */
+.alert{
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+/* =========================
+   Footer (azul más oscuro para contraste)
+   ========================= */
+footer,
+.footer{
+  background: #1d4ed8;
+  color: #eef2ff;
   padding: 1rem 0;
-  font-size: 0.9rem;
   text-align: center;
+  flex-shrink: 0;
 }
 
-.footer p {
-  color: #ADD8E6; /* Ajusta el color celeste si prefieres que sea más oscuro */
+footer p,
+.footer p{
   margin: 0;
+  color: #eef2ff;
 }
 
-
-/* Estilo para el botón de menú desplegable */
-.navbar-toggler {
-  border-color: #007bbd; /* Borde celeste oscuro */
-}
-
-.navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28007,123,189,1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-}
-
-/* Estilo para el carrusel de fotos */
-
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
-    border-radius: 50%; /* Bordes redondeados */
-    width: 25px; /* Tamaño reducido */
-    height: 25px; /* Tamaño reducido */
-}
-
-.carousel-item img {
-    width: 100%;
-    height: 300px; /* Ajusta la altura según lo necesites */
-    object-fit: cover; /* Para que las imágenes se adapten al contenedor */
-}
-
-.carousel-indicators li {
-    background-color: #fff; /* Color blanco para los indicadores */
-    border-radius: 50%; /* Bordes redondeados */
-    width: 12px; /* Tamaño reducido */
-    height: 12px; /* Tamaño reducido */
-}
-
-.carousel-caption {
-  background-color: rgba(0, 0, 0, 0.6); /* Fondo negro semitransparente */
-  padding: 10px;
-  border-radius: 8px; /* Esquinas redondeadas */
-}
-
-#searchForm {
+/* =========================
+   Search (si lo usás)
+   ========================= */
+#searchForm{
   display: flex;
   align-items: center;
 }
-
-#searchForm .form-control {
-  width: 200px;
+#searchForm .form-control{
+  width: 220px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+#searchForm .btn{
+  margin-left: 6px;
+  border-radius: 10px;
 }
 
-#searchForm .btn {
-  margin-left: 5px;
-}
-
-.map-responsive {
+/* =========================
+   Map responsive
+   ========================= */
+.map-responsive{
   overflow: hidden;
   padding-bottom: 56.25%;
   position: relative;
   height: 0;
 }
-
-.map-responsive iframe {
+.map-responsive iframe{
   left: 0;
   top: 0;
   height: 100%;
   width: 100%;
   position: absolute;
 }
-header.bg-light {
-  background: #f8f9fa;
-}
-
-header h1 {
-  font-weight: bold;
-}
-
-main h2 {
-  margin-top: 2rem;
-  font-weight: bold;
-}
-.text-lightblue {
-  color: #ADD8E6 !important; /* Un color celeste claro */
-}
-.carousel-container {
-  position: relative;
-  text-align: center;
-}
-
-.carousel-caption {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white; /* Asegura que el texto se vea sobre cualquier fondo */
-  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Opcional: sombra para mayor visibilidad */
-}
-
-.store-search {
-  text-align: center;
-  padding: 2rem 0;
-  background-color: #f8f9fa;
-}
-
-.store-list {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-}
-
-.store {
-  width: 45%;
-  margin-bottom: 2rem;
-  border: 1px solid #ddd;
-  padding: 1rem;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.store-img {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-}
-
-.store-name {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 1rem 0;
-}
-
-.store-description {
-  font-size: 1rem;
-  color: #555;
-}
-
-.btn-success {
-  margin-top: 1rem;
-}
-
-
